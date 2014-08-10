@@ -928,6 +928,9 @@ static void send_local_on_cmds(struct work_struct *work)
 			    panel_data);
 
 	mutex_lock(&panel_cmd_mutex);
+	if (cmds_panel_data->panel_info.cont_splash_enabled)
+		return;
+
 	if (local_pdata->on_cmds.cmd_cnt)
 		mdss_dsi_panel_cmds_send(ctrl, &local_pdata->on_cmds);
 	mutex_unlock(&panel_cmd_mutex);
