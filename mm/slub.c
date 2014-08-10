@@ -1486,13 +1486,11 @@ static inline void remove_partial(struct kmem_cache_node *n,
  */
 static inline void *acquire_slab(struct kmem_cache *s,
 		struct kmem_cache_node *n, struct page *page,
-		int mode, int *objects)
+		int mode)
 {
 	void *freelist;
 	unsigned long counters;
 	struct page new;
-
-	lockdep_assert_held(&n->list_lock);
 
 	/*
 	 * Zap the freelist and set the frozen bit.
@@ -1502,21 +1500,17 @@ static inline void *acquire_slab(struct kmem_cache *s,
 	freelist = page->freelist;
 	counters = page->counters;
 	new.counters = counters;
-	*objects = new.objects - new.inuse;
-	if (mode) {
+	if (mode)
 		new.inuse = page->objects;
-		new.freelist = NULL;
-	} else {
-		new.freelist = freelist;
-	}
 
 	VM_BUG_ON(new.frozen);
 	new.frozen = 1;
 
 	if (!__cmpxchg_double_slab(s, page,
 			freelist, counters,
-			new.freelist, new.counters,
+			NULL, new.counters,
 			"acquire_slab"))
+
 		return NULL;
 
 	remove_partial(n, page);
@@ -1563,6 +1557,7 @@ static void *get_partial_node(struct kmem_cache *s, struct kmem_cache_node *n,
 			object = t;
 			available =  page->objects - page->inuse;
 		} else {
+			page->freelist = t;
 			available = put_cpu_partial(s, page, 0);
 			stat(s, CPU_PARTIAL_NODE);
 		}
