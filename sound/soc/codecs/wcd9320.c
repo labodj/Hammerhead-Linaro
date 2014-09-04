@@ -4108,6 +4108,11 @@ static int taiko_volatile(struct snd_soc_codec *ssc, unsigned int reg)
 
 	if (reg == TAIKO_A_MBHC_INSERT_DET_STATUS)
 		return 1;
+#ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
+	/* HPH gain registers */
+	if (reg == TAIKO_A_RX_HPH_L_GAIN || reg == TAIKO_A_RX_HPH_R_GAIN)
+		return 1;
+#endif
 
 	switch (reg) {
 	case TAIKO_A_CDC_SPKR_CLIPDET_VAL0:
@@ -4174,10 +4179,6 @@ int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 	unsigned int value)
 {
 	int ret;
-#ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
-	int val;
-#endif
-
 	if (reg == SND_SOC_NOPM)
 		return 0;
 
@@ -4191,18 +4192,14 @@ int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 	}
 
 #ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
-	if (!snd_hax_reg_access(reg)) {
-		if (!((val = snd_hax_cache_read(reg)) != -1)) {
-			val = wcd9xxx_reg_read_safe(codec->control_data, reg);
-		}
-	} else {
+	/* In case of no reg access, override with cache value */
+	if (!snd_hax_reg_access(reg) &&
+	    snd_hax_cache_read(reg) != -1)
+		value = snd_hax_cache_read(reg);
+	else
 		snd_hax_cache_write(reg, value);
-		val = value;
-	}
-	return wcd9xxx_reg_write(codec->control_data, reg, val);
-#else
-	return wcd9xxx_reg_write(codec->control_data, reg, value);
 #endif
+	return wcd9xxx_reg_write(codec->control_data, reg, value);
 }
 #ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
 EXPORT_SYMBOL(taiko_write);
