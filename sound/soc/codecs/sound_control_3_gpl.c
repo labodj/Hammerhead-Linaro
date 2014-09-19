@@ -23,9 +23,7 @@
 #include <linux/mfd/wcd9xxx/wcd9320_registers.h>
 
 #define SOUND_CONTROL_MAJOR_VERSION	3
-#define SOUND_CONTROL_MINOR_VERSION	5
-
-#define REG_SZ	21
+#define SOUND_CONTROL_MINOR_VERSION	6
 
 extern struct snd_soc_codec *fauxsound_codec_ptr;
 extern int wcd9xxx_hw_revision;
@@ -36,10 +34,10 @@ unsigned int taiko_read(struct snd_soc_codec *codec, unsigned int reg);
 int taiko_write(struct snd_soc_codec *codec, unsigned int reg,
 		unsigned int value);
 
-
+#define REG_SZ	25
 static int cached_regs[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 			    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			    -1};
+			    -1, -1, -1, -1, -1 };
 
 void snd_hax_cache_write(unsigned int reg, unsigned int value)
 {
@@ -106,6 +104,18 @@ void snd_hax_cache_write(unsigned int reg, unsigned int value)
 			break;
 		case TAIKO_A_CDC_TX10_VOL_CTL_GAIN:
 			cached_regs[20] = value;
+			break;
+		case TAIKO_A_RX_LINE_1_GAIN:
+			cached_regs[21] = value;
+			break;
+		case TAIKO_A_RX_LINE_2_GAIN:
+			cached_regs[22] = value;
+			break;
+		case TAIKO_A_RX_LINE_3_GAIN:
+			cached_regs[23] = value;		
+			break;
+		case TAIKO_A_RX_LINE_4_GAIN:
+			cached_regs[24] = value;
 			break;
 		default:
 			break;
@@ -194,6 +204,18 @@ int snd_hax_cache_read(unsigned int reg)
 		case TAIKO_A_CDC_TX10_VOL_CTL_GAIN:
 			out = cached_regs[20];
 			break;
+		case TAIKO_A_RX_LINE_1_GAIN:
+			out = cached_regs[21];
+			break;
+		case TAIKO_A_RX_LINE_2_GAIN:
+			out = cached_regs[22];
+			break;
+		case TAIKO_A_RX_LINE_3_GAIN:
+			out = cached_regs[23];
+			break;
+		case TAIKO_A_RX_LINE_4_GAIN:
+			out = cached_regs[24];
+			break;
 #endif
 		default:
 			break;
@@ -218,6 +240,10 @@ int snd_hax_reg_access(unsigned int reg)
 		case TAIKO_A_CDC_RX5_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX6_VOL_CTL_B2_CTL:
 		case TAIKO_A_CDC_RX7_VOL_CTL_B2_CTL:
+		case TAIKO_A_RX_LINE_1_GAIN:
+		case TAIKO_A_RX_LINE_2_GAIN:
+		case TAIKO_A_RX_LINE_3_GAIN:
+		case TAIKO_A_RX_LINE_4_GAIN:
 		case TAIKO_A_CDC_TX1_VOL_CTL_GAIN:
 		case TAIKO_A_CDC_TX2_VOL_CTL_GAIN:
 		case TAIKO_A_CDC_TX3_VOL_CTL_GAIN:
