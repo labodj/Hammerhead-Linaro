@@ -4108,10 +4108,13 @@ static int taiko_volatile(struct snd_soc_codec *ssc, unsigned int reg)
 
 	if (reg == TAIKO_A_MBHC_INSERT_DET_STATUS)
 		return 1;
+
+#ifndef CONFIG_MACH_LGE
 #ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
 	/* HPH gain registers */
 	if (reg == TAIKO_A_RX_HPH_L_GAIN || reg == TAIKO_A_RX_HPH_R_GAIN)
 		return 1;
+#endif
 #endif
 
 	switch (reg) {
@@ -6525,7 +6528,6 @@ static int taiko_codec_probe(struct snd_soc_codec *codec)
 	struct wcd9xxx *core = dev_get_drvdata(codec->dev->parent);
 
 #ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
-	pr_info("taiko codec probe...\n");
 	fauxsound_codec_ptr = codec;
 #endif
 
